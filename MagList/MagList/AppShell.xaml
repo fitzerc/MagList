@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="MagList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:MagList.MainPage"
-    Shell.FlyoutBehavior="Disabled">
-
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
-
+    xmlns:mainPage="clr-namespace:MagList.MainPage"
+    xmlns:listPage="clr-namespace:MagList.ListPage"
+    x:Class="MagList.AppShell">
+    <TabBar>
+        <ShellContent Title="Home"
+                     ContentTemplate="{DataTemplate mainPage:MainPage}" />
+        <ShellContent Title="Lists"
+                     ContentTemplate="{DataTemplate listPage:ListPage}" />
+    </TabBar>
 </Shell>
