@@ -36,28 +36,34 @@
                     TextColor="{StaticResource Primary}"/>
             </Grid>
 
-            <CollectionView ItemsSource="{Binding EntryList}" Margin="14, 0, 10, 0">
+            <CollectionView ItemsSource="{Binding EntryList}" Margin="10, 0, 8, 0">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
+                        <Border StrokeShape="RoundRectangle 10,10,10,10"
+                            StrokeThickness="1"
+                            Stroke="{StaticResource Primary}"
+                            BackgroundColor="{StaticResource Secondary}">
+                            <Border.GestureRecognizers>
+                                <DragGestureRecognizer CanDrag="True" />
+                            </Border.GestureRecognizers>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="9*" />
-                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="87*" />
+                                <ColumnDefinition Width="13*" />
                             </Grid.ColumnDefinitions>
                             <VerticalStackLayout Grid.Column="0">
-                                <Label Text="{Binding Name}" FontSize="Medium" />
-                                <Label Margin="15, 0, 0, 0" FontSize="Small" Text="{Binding Description}" />
+                                <Label Text="{Binding Name}" TextColor="{StaticResource Tertiary}" FontSize="Medium" Margin="5, 0, 0, 0" />
+                                <Label Margin="15, 0, 0, 8" FontSize="Small" TextColor="{StaticResource Primary}" Text="{Binding Description}" />
                             </VerticalStackLayout>
                             <Button BackgroundColor="{StaticResource Secondary}"
-                                BorderColor="{StaticResource Primary}"
-                                BorderWidth=".5"
+                                VerticalOptions="Center"
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=DeleteClickedCommand}"
                                 CommandParameter="{Binding .}"
                                 Grid.Column="1"
-                                Margin="0, 2, 0, 2"
                                 Text="x"
                                 TextColor="{StaticResource Primary}" />
                         </Grid>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

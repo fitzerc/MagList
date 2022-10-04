@@ -4,10 +4,10 @@ namespace MagList.MainPage;
 
 public partial class MainPage : ContentPage
 {
-	public MainPage()
+	public MainPage(MainPageViewModel mainPageViewModel)
 	{
 		InitializeComponent();
-		BindingContext = new MainPageViewModel();
+		BindingContext = mainPageViewModel;
 	}
 }
 
