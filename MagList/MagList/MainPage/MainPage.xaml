@@ -44,7 +44,18 @@
                             Stroke="{StaticResource Primary}"
                             BackgroundColor="{StaticResource Secondary}">
                             <Border.GestureRecognizers>
-                                <DragGestureRecognizer CanDrag="True" />
+                                <DragGestureRecognizer
+                                    DragStartingCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDraggedCommand}"
+                                    DragStartingCommandParameter="{Binding .}"
+                                    CanDrag="True" />
+                                <DropGestureRecognizer
+                                    DragOverCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDraggedOverCommand}"
+                                    DragOverCommandParameter="{Binding .}"
+                                    DragLeaveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDragLeaveCommand}"
+                                    DragLeaveCommandParameter="{Binding .}"
+                                    DropCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDroppedCommand}"
+                                    DropCommandParameter="{Binding .}"
+                                    />
                             </Border.GestureRecognizers>
                         <Grid>
                             <Grid.ColumnDefinitions>

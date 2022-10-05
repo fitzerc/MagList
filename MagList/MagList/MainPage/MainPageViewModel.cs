@@ -29,7 +29,12 @@ public partial class MainPageViewModel : ObservableObject
 
         try
         {
-            entryList = new ObservableCollection<EntryModel>(_entryReader.GetAll());
+            var entries = _entryReader.GetAll();
+
+            foreach (var entry in entries)
+            {
+                EntryList.Add(EntryViewModel.FromEntryModel(entry));
+            }
         }
         catch (Exception e)
         {
@@ -38,7 +43,7 @@ public partial class MainPageViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    ObservableCollection<EntryModel> entryList = new ObservableCollection<EntryModel>();
+    ObservableCollection<EntryViewModel> entryList = new ObservableCollection<EntryViewModel>();
 
     [ObservableProperty]
     string newEntryName = "";
@@ -49,16 +54,55 @@ public partial class MainPageViewModel : ObservableObject
         var newEntry = new EntryModel() { Name = NewEntryName, Description = $"Description for {NewEntryName}", Order = -1 };
 
         _entryWriter?.Write(newEntry);
-        EntryList.Add(newEntry);
+        EntryList.Add(EntryViewModel.FromEntryModel(newEntry));
 
         NewEntryName = "";
     }
 
     [RelayCommand]
-    void DeleteClicked(EntryModel entry)
+    void DeleteClicked(EntryViewModel entry)
     {
-        _entryWriter?.Delete(entry);
+        _entryWriter?.Delete(EntryViewModel.ToEntryModel(entry));
         EntryList.Remove(entry);
+    }
+
+    [RelayCommand]
+    void ItemDragged(EntryViewModel entry)
+    {
+        EntryList
+            .First(x => x.Name == entry.Name && x.Description == entry.Description)
+            .IsBeingDragged = true;
+    }
+
+    [RelayCommand]
+    void ItemDraggedOver(EntryViewModel entry)
+    {
+        EntryList
+            .First(x => x.Name == entry.Name && x.Description == entry.Description)
+            .IsBeingDraggedOver = true;
+    }
+
+    [RelayCommand]
+    void ItemDragLeave(EntryViewModel entry)
+    {
+        EntryList
+            .First(x => x.Name == entry.Name && x.Description == entry.Description)
+            .IsBeingDraggedOver = false;
+    }
+
+    [RelayCommand]
+    void ItemDropped(EntryViewModel item)
+    {
+        var itemToMove = EntryList.First(i => i.IsBeingDragged);
+        var itemToInsertBefore = item;
+        if (itemToMove == null || itemToInsertBefore == null || itemToMove == itemToInsertBefore)
+            return;
+
+        var insertAtIndex = EntryList.IndexOf(itemToInsertBefore);
+        EntryList.Remove(itemToMove);
+        EntryList.Insert(insertAtIndex, itemToMove);
+        itemToMove.IsBeingDragged = false;
+        itemToInsertBefore.IsBeingDraggedOver = false;
     }
 }
 
