@@ -6,5 +6,6 @@ public interface IEntryWriter
 {
     void Write(EntryModel entry);
     void UpdateAll(IEnumerable<EntryModel> entries);
-    void Delete(EntryModel entry);
+    void Delete(int entryId);
+    void Update(EntryModel entry);
 }

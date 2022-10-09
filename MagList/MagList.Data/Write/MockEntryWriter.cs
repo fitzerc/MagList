@@ -4,7 +4,14 @@ namespace MagList.Data.Write;
 
 public class MockEntryWriter : IEntryWriter
 {
-    public void Delete(EntryModel entry)
+    public int LastWriteId;
+    public int LastDeleteId;
+
+    public void Delete(int entryId)
+    {
+    }
+
+    public void Update(EntryModel entry)
     {
     }
 

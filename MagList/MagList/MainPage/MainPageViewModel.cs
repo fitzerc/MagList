@@ -51,7 +51,12 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     void AddClicked()
     {
-        var newEntry = new EntryModel() { Name = NewEntryName, Description = $"Description for {NewEntryName}", Order = -1 };
+        var newEntry = new EntryModel()
+        {
+            Name = NewEntryName,
+            Description = $"Description for {NewEntryName}",
+            Order = -1
+        };
 
         _entryWriter?.Write(newEntry);
         EntryList.Add(EntryViewModel.FromEntryModel(newEntry));
@@ -62,7 +67,7 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     void DeleteClicked(EntryViewModel entry)
     {
-        _entryWriter?.Delete(EntryViewModel.ToEntryModel(entry));
+        _entryWriter?.Delete(entry.Id);
         EntryList.Remove(entry);
     }
 

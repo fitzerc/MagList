@@ -6,6 +6,9 @@ namespace MagList.MainPage;
 public partial class EntryViewModel : ObservableObject
 {
     [ObservableProperty]
+    int id;
+
+    [ObservableProperty]
     string name;
 
     [ObservableProperty]
@@ -20,23 +23,45 @@ public partial class EntryViewModel : ObservableObject
     [ObservableProperty]
     bool isBeingDraggedOver = false;
 
-    public static EntryModel ToEntryModel(EntryViewModel vm)
+    public static EntryModel ToEntryModel(EntryViewModel entryVm)
     {
+        if (entryVm == null)
+        {
+            throw new ArgumentNullException(nameof(entryVm));
+        }
+
         return new EntryModel
         {
-            Name = vm.Name,
-            Description = vm.Description,
-            Order = vm.Order
+            Id = entryVm.Id,
+            Name = entryVm.Name,
+            Description = entryVm.Description,
+            Order = entryVm.Order
         };
     }
 
-    public static EntryViewModel FromEntryModel(EntryModel entry)
+    public static EntryViewModel FromEntryModel(EntryModel entryModel)
     {
+        if (entryModel == null)
+        {
+            throw new ArgumentNullException(nameof(entryModel));
+        }
+
         return new EntryViewModel
         {
-            Name = entry.Name,
-            Description = entry.Description,
-            Order = entry.Order
+            Id = entryModel.Id,
+            Name = entryModel.Name,
+            Description = entryModel.Description,
+            Order = entryModel.Order
         };
+    }
+
+    public bool Equals(EntryViewModel entryVm)
+    {
+        if (entryVm == null)
+        {
+            throw new ArgumentNullException(nameof(entryVm));
+        }
+
+        return entryVm.Id == Id && entryVm.Name == Name && entryVm.Description == Description && entryVm.Order == Order;
     }
 }
