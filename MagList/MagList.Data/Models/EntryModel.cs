@@ -1,5 +1,4 @@
-﻿
-using SQLite;
+﻿using SQLite;
 
 namespace MagList.Data.Models;
 

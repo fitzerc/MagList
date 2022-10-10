@@ -17,13 +17,11 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-        var path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+        var path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         path = Path.Combine(path, "maglist.db3");
 
         builder.Services.AddSingleton(new SQLiteConnection(path));
-		//builder.Services.AddTransient<IEntryWriter, MockEntryWriter>();
 		builder.Services.AddTransient<IEntryWriter, SqliteEntryWriter>();
-		//builder.Services.AddTransient<IEntryReader, MockEntryReader>();
 		builder.Services.AddTransient<IEntryReader, SqliteEntryReader>();
 		builder.Services.AddSingleton<MainPage.MainPage>();
 		builder.Services.AddSingleton<MainPage.MainPageViewModel>();

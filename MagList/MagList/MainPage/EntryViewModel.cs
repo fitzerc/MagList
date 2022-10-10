@@ -23,6 +23,7 @@ public partial class EntryViewModel : ObservableObject
     [ObservableProperty]
     bool isBeingDraggedOver = false;
 
+    //TODO: doesn't need to be static
     public static EntryModel ToEntryModel(EntryViewModel entryVm)
     {
         if (entryVm == null)

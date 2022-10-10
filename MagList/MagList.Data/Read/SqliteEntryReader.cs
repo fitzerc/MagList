@@ -3,6 +3,7 @@ using SQLite;
 
 namespace MagList.Data.Read;
 
+//TODO: make a base that takes a sql connection?
 public class SqliteEntryReader : IEntryReader
 {
     private readonly SQLiteConnection _con;
@@ -15,9 +16,9 @@ public class SqliteEntryReader : IEntryReader
 
     public EntryModel Get(string name)
     {
-        var record = _con.Table<EntryModel>()
-            .Where(entry => entry.Name == name)
-            .FirstOrDefault();
+        var record = _con
+            .Table<EntryModel>()
+            .FirstOrDefault(entry => entry.Name == name);
 
         return record;
     }

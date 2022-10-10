@@ -14,18 +14,8 @@ public partial class MainPageViewModel : ObservableObject
 
     public MainPageViewModel(IEntryReader entryReader, IEntryWriter entryWriter)
     {
-        if (entryReader == null)
-        {
-            throw new ArgumentNullException(nameof(entryReader));
-        }
-
-        if (entryWriter == null)
-        {
-            throw new ArgumentNullException(nameof(entryWriter));
-        }
-
-        _entryReader = entryReader;
-        _entryWriter = entryWriter;
+        _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
+        _entryWriter = entryWriter ?? throw new ArgumentNullException(nameof(entryWriter));
 
         try
         {
