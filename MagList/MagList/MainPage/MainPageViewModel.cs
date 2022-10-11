@@ -45,7 +45,7 @@ public partial class MainPageViewModel : ObservableObject
         {
             Name = NewEntryName,
             Description = $"Description for {NewEntryName}",
-            Order = -1
+            Order = EntryList.Count + 1
         };
 
         _entryWriter?.Write(newEntry);
@@ -91,13 +91,44 @@ public partial class MainPageViewModel : ObservableObject
         var itemToMove = EntryList.First(i => i.IsBeingDragged);
         var itemToInsertBefore = item;
         if (itemToMove == null || itemToInsertBefore == null || itemToMove == itemToInsertBefore)
+        {
             return;
+        }
 
         var insertAtIndex = EntryList.IndexOf(itemToInsertBefore);
         EntryList.Remove(itemToMove);
         EntryList.Insert(insertAtIndex, itemToMove);
         itemToMove.IsBeingDragged = false;
         itemToInsertBefore.IsBeingDraggedOver = false;
+
+        ReorderAndWriteList();
+    }
+
+    private void ReorderAndWriteList()
+    {
+        UpdateListEntryOrders();
+    }
+
+    private void UpdateListEntryOrders()
+    {
+        for (var i = 0; i < EntryList.Count; i++)
+        {
+            EntryList[i].Order = i + 1;
+        }
+
+        _entryWriter.UpdateAll(MapToEntryModelCollection(EntryList));
+    }
+
+    private IEnumerable<EntryModel> MapToEntryModelCollection(ObservableCollection<EntryViewModel> entryList)
+    {
+        var modelList = new List<EntryModel>();
+
+        foreach (var entry in entryList)
+        {
+            modelList.Add(EntryViewModel.ToEntryModel(entry));
+        }
+
+        return modelList;
     }
 }
 

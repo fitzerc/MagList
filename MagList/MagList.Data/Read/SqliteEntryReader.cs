@@ -25,6 +25,6 @@ public class SqliteEntryReader : IEntryReader
 
     public IEnumerable<EntryModel> GetAll()
     {
-        return _con.Table<EntryModel>();
+        return _con.Table<EntryModel>().OrderBy(x => x.Order);
     }
 }
