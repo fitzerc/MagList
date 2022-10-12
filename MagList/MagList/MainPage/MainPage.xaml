@@ -54,8 +54,10 @@
                                     DragLeaveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDragLeaveCommand}"
                                     DragLeaveCommandParameter="{Binding .}"
                                     DropCommand="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=ItemDroppedCommand}"
-                                    DropCommandParameter="{Binding .}"
-                                    />
+                                    DropCommandParameter="{Binding .}" />
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPageViewModel}}, Path=EntryTappedCommand}"
+                                    CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
                         <Grid>
                             <Grid.ColumnDefinitions>

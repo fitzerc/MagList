@@ -1,5 +1,6 @@
 ﻿using MagList.Data.Read;
 using MagList.Data.Write;
+using MagList.EntryDetailPage;
 using SQLite;
 
 namespace MagList;
@@ -26,6 +27,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MainPage.MainPage>();
 		builder.Services.AddSingleton<MainPage.MainPageViewModel>();
 		builder.Services.AddSingleton<ListPage.ListPage>();
+        builder.Services.AddTransient<EntryDetailViewModel>();
+        builder.Services.AddTransient<EntryDetailView>();
 
 		return builder.Build();
 	}

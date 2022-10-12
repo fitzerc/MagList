@@ -4,6 +4,7 @@ using MagList.Data.Models;
 using MagList.Data.Read;
 using MagList.Data.Write;
 using System.Collections.ObjectModel;
+using MagList.EntryDetailPage;
 
 namespace MagList.MainPage;
 
@@ -37,6 +38,17 @@ public partial class MainPageViewModel : ObservableObject
 
     [ObservableProperty]
     string newEntryName = "";
+
+    [RelayCommand]
+    async Task EntryTapped(EntryViewModel entry)
+    {
+        var navParams = new Dictionary<string, object>
+        {
+            {nameof(EntryViewModel), entry}
+        };
+
+        await Shell.Current.GoToAsync(nameof(EntryDetailView), navParams);
+    }
 
     [RelayCommand]
     void AddClicked()
