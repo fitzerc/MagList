@@ -8,6 +8,9 @@ public class EntryModel
     [PrimaryKey, AutoIncrement, Column("id")]
     public int Id { get; set; }
 
+    [Column("listId")]
+    public int ListId { get; set; }
+
     [MaxLength(30)]
     public string Name { get; set;}
 

@@ -10,7 +10,7 @@ public class SqliteEntryWriter : IEntryWriter
     public SqliteEntryWriter(SQLiteConnection con)
     {
         _con = con;
-        con.CreateTable<EntryModel>();
+        _con.CreateTable<EntryModel>();
     }
 
     public void Delete(int entryId)

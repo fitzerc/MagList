@@ -12,15 +12,32 @@ public partial class MainPageViewModel : ObservableObject
 {
     private readonly IEntryReader _entryReader;
     private readonly IEntryWriter _entryWriter;
+    private readonly IListReader _listReader;
+    private readonly IListWriter _listWriter;
 
-    public MainPageViewModel(IEntryReader entryReader, IEntryWriter entryWriter)
+    private List<ListModel> _lists;
+    private ListModel _currentList;
+
+    public MainPageViewModel(IEntryReader entryReader, IEntryWriter entryWriter, IListReader listReader, IListWriter listWriter)
     {
         _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
         _entryWriter = entryWriter ?? throw new ArgumentNullException(nameof(entryWriter));
+        _listReader = listReader ?? throw new ArgumentException(nameof(listReader));
+        _listWriter = listWriter ?? throw new ArgumentException(nameof(listWriter));
 
         try
         {
-            var entries = _entryReader.GetAll();
+            _lists = _listReader.GetAll().ToList();
+
+            if (!_lists.Any())
+            {
+                _listWriter.Write(new ListModel{Name = "Default"});
+                _lists = _listReader.GetAll().ToList();
+            }
+
+            _currentList = _lists.FirstOrDefault();
+
+            var entries = _entryReader.GetAllInList(_currentList.Id);
 
             foreach (var entry in entries)
             {
@@ -44,6 +61,7 @@ public partial class MainPageViewModel : ObservableObject
     {
         var navParams = new Dictionary<string, object>
         {
+            {EntryDetailViewModel.LIST_NAME_PARAM_NAME, _currentList.Name},
             {nameof(EntryViewModel), entry}
         };
 
@@ -56,6 +74,7 @@ public partial class MainPageViewModel : ObservableObject
         var newEntry = new EntryModel()
         {
             Name = NewEntryName,
+            ListId = _currentList.Id,
             Description = $"Description for {NewEntryName}",
             Order = EntryList.Count + 1
         };

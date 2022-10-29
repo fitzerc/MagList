@@ -4,6 +4,6 @@ namespace MagList.Data.Read;
 
 public interface IEntryReader
 {
-    IEnumerable<EntryModel> GetAll();
+    IEnumerable<EntryModel> GetAllInList(int listId);
     EntryModel Get(string name);
 }

@@ -9,9 +9,13 @@ public class MainPageViewModelTests
 {
     private readonly IEntryReader _mockEntryReader = new MockEntryReader();
     private readonly IEntryWriter _mockEntryWriter = new MockEntryWriter();
-
     private readonly IEntryWriter _badEntryWriter = new MockBadEntryWriter();
     private readonly IEntryReader _badEntryReader = new MockBadEntryReader();
+
+    private readonly IListWriter _mockListWriter = new MockListWriter();
+    private readonly IListWriter _mockBadListWriter = new MockBadListWriter();
+    private readonly IListReader _mockListReader = new MockListReader();
+    private readonly IListReader _mockBadListReader = new MockBadListReader();
 
     [Fact]
     public void AddCommand_Test()
@@ -19,6 +23,7 @@ public class MainPageViewModelTests
         var sut = GetMainPageViewModel();
         var expectedAddition = new EntryViewModel()
         {
+            ListId = 1,
             Description = $"Description for {"Test 4"}",
             Name = "Test 4",
             Order = -1
@@ -103,25 +108,25 @@ public class MainPageViewModelTests
     public void Constructor_NoDataAccess_Test()
     {
         Assert.Throws<MainPageViewModelInitException>(
-            () => new MainPageViewModel(_badEntryReader, _badEntryWriter));
+            () => new MainPageViewModel(_badEntryReader, _badEntryWriter, _mockBadListReader, _mockBadListWriter));
     }
 
     [Fact]
     public void Constructor_NullEntryWriter_Test()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(_badEntryReader, null));
+            () => new MainPageViewModel(_badEntryReader, null, _mockBadListReader, _mockBadListWriter));
     }
 
     [Fact]
     public void Constructor_NullEntryReader_Test()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(null, _badEntryWriter));
+            () => new MainPageViewModel(null, _badEntryWriter, _mockListReader, _mockListWriter));
     }
 
     private MainPageViewModel GetMainPageViewModel()
     {
-        return new MainPageViewModel(_mockEntryReader, _mockEntryWriter);
+        return new MainPageViewModel(_mockEntryReader, _mockEntryWriter, _mockListReader, _mockListWriter);
     }
 }

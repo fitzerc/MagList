@@ -9,6 +9,9 @@ public partial class EntryViewModel : ObservableObject
     int id;
 
     [ObservableProperty]
+    private int listId;
+
+    [ObservableProperty]
     string name;
 
     [ObservableProperty]

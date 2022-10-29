@@ -23,8 +23,11 @@ public class SqliteEntryReader : IEntryReader
         return record;
     }
 
-    public IEnumerable<EntryModel> GetAll()
+    public IEnumerable<EntryModel> GetAllInList(int listId)
     {
-        return _con.Table<EntryModel>().OrderBy(x => x.Order);
+        return _con
+            .Table<EntryModel>()
+            .Where(y => y.ListId == listId)
+            .OrderBy(x => x.Order);
     }
 }
