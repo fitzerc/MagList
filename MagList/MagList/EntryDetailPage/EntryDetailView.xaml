@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MagList.EntryDetailPage.EntryDetailView"
              Title="{Binding ListName}">
-    <Grid BindingContext="{Binding EntryVm}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition  Height="Auto"/>
@@ -11,6 +11,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <VerticalStackLayout Grid.Row="0"
+            BindingContext="{Binding EntryVm}"
             Padding="10, 2, 10, 2"
             HorizontalOptions="Fill">
             <Label 
@@ -23,6 +24,7 @@
                 Text="{Binding Name, Mode=TwoWay}" />
         </VerticalStackLayout>
         <VerticalStackLayout Grid.Row="1"
+            BindingContext="{Binding EntryVm}"
             Padding="10, 2, 10, 2"
             HorizontalOptions="Fill">
             <Label 
@@ -37,6 +39,7 @@
         </VerticalStackLayout>
         <Button
             Grid.Row="3"
+            Command="{Binding SaveClickedCommand}"
             VerticalOptions="End"
             Text="Save"/>
     </Grid>

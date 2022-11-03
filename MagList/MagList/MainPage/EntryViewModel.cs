@@ -37,6 +37,7 @@ public partial class EntryViewModel : ObservableObject
         return new EntryModel
         {
             Id = entryVm.Id,
+            ListId = entryVm.ListId,
             Name = entryVm.Name,
             Description = entryVm.Description,
             Order = entryVm.Order
@@ -53,6 +54,7 @@ public partial class EntryViewModel : ObservableObject
         return new EntryViewModel
         {
             Id = entryModel.Id,
+            ListId = entryModel.ListId,
             Name = entryModel.Name,
             Description = entryModel.Description,
             Order = entryModel.Order
