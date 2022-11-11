@@ -4,7 +4,7 @@ using SQLite;
 
 namespace MagList.Data.Read;
 
-internal class SqliteTagReader : ITagReader
+public class SqliteTagReader : ITagReader
 {
     private readonly SQLiteConnection _con;
 

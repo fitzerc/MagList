@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition  Height="Auto"/>
+            <RowDefinition  Height="Auto"/>
             <RowDefinition  Height="*"/>
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -37,8 +38,40 @@
                 TextColor="{StaticResource Primary}"
                 Text="{Binding Description, Mode=TwoWay}" />
         </VerticalStackLayout>
+        <HorizontalStackLayout
+            Grid.Row="2"
+            Padding="15, 0, 15, 0">
+            <Editor
+                BackgroundColor="{StaticResource Secondary}"
+                Placeholder="Add Tag"
+                TextColor="{StaticResource Primary}"
+                Text="{Binding NewTag, Mode=TwoWay}" />
+            <Button Text="+" Command="{Binding TagAddClickedCommand}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            VerticalOptions="Start"
+            Padding="10, 10, 10, 10"
+            Grid.Row="3">
+            <CollectionView ItemsLayout="HorizontalList" ItemsSource="{Binding Tags}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BackgroundColor="{StaticResource Secondary}"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Start"
+                                StrokeThickness="1"
+                                Stroke="{StaticResource Primary}"
+                                StrokeShape="RoundRectangle 5,5,5,5">
+                            <Label 
+                                Padding="5,0,5,0"
+                                TextColor="{StaticResource Primary}"
+                                Text="{Binding Name}"/>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </HorizontalStackLayout>
         <Button
-            Grid.Row="3"
+            Grid.Row="4"
             Command="{Binding SaveClickedCommand}"
             VerticalOptions="End"
             Text="Save"/>

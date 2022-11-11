@@ -26,6 +26,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<IEntryReader, SqliteEntryReader>();
         builder.Services.AddTransient<IListWriter, SqliteListWriter>();
         builder.Services.AddTransient<IListReader, SqliteListReader>();
+        builder.Services.AddTransient<ITagReader, SqliteTagReader>();
+        builder.Services.AddTransient<ITagWriter, SqliteTagWriter>();
 		builder.Services.AddSingleton<MainPage.MainPage>();
 		builder.Services.AddSingleton<MainPage.MainPageViewModel>();
 		builder.Services.AddSingleton<ListPage.ListPage>();

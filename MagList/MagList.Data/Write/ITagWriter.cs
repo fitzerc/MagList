@@ -2,7 +2,7 @@
 
 namespace MagList.Data.Write;
 
-internal interface ITagWriter
+public interface ITagWriter
 {
     void Write(TagModel tag);
     void Delete(int tagId);
