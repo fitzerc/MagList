@@ -13,11 +13,13 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
     public const string LIST_NAME_PARAM_NAME = "listName";
     private readonly IEntryWriter _entryWriter;
     private readonly ITagReader _tagReader;
+    private readonly ITagWriter _tagWriter;
 
-    public EntryDetailViewModel(IEntryWriter entryWriter, ITagReader tagReader)
+    public EntryDetailViewModel(IEntryWriter entryWriter, ITagReader tagReader, ITagWriter tagWriter)
     {
         _entryWriter = entryWriter;
         _tagReader = tagReader;
+        _tagWriter = tagWriter;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -59,12 +61,22 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
     [RelayCommand]
     void TagAddClicked()
     {
-        tags.Add(new TagModel
+        var newTagModel = new TagModel
         {
             Name = newTag,
             EntryId = entryVm.Id
-        });
+        };
+
+        tags.Add(newTagModel);
+        _tagWriter.Write(newTagModel);
 
         NewTag = "";
+    }
+
+    [RelayCommand]
+    void RemoveTagClicked(TagModel tagToDel)
+    {
+        _tagWriter.Delete(tagToDel.Id);
+        tags.Remove(tagToDel);
     }
 }
