@@ -31,7 +31,19 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MainPage.MainPage>();
 		builder.Services.AddSingleton<MainPage.MainPageViewModel>();
 		builder.Services.AddSingleton<ListPage.ListPage>();
-        builder.Services.AddTransient<EntryDetailViewModel>();
+        builder.Services.AddTransient<EntryDetailViewModel>((sp) =>
+        {
+			//TODO: move somewhere that makes more sense?
+			var entryDetailVm = new EntryDetailViewModel(sp.GetService<IEntryWriter>(), sp.GetService<ITagReader>());
+
+            var tagWriter = sp.GetService<ITagWriter>();
+
+            entryDetailVm.TagAdded += (sender, model) => tagWriter.Write(model);
+            entryDetailVm.TagRemoved += (ConversationSenders, model) => tagWriter.Delete(model.Id);
+
+            return entryDetailVm;
+        });
+
         builder.Services.AddTransient<EntryDetailView>();
 
 		return builder.Build();

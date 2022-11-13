@@ -1,8 +1,10 @@
-﻿using MagList.Data.Read;
+﻿using MagList.Data.Models;
+using MagList.Data.Read;
 using MagList.Data.Write;
 using MagList.EntryDetailPage;
 using MagList.MainPage;
 using MagList.Test.Mocks;
+using Microsoft.Maui.Platform;
 
 namespace MagList.Test.EntryDetailPage;
 
@@ -12,7 +14,6 @@ public class EntryDetailViewModelTests
     public const string ENTRY_VIEW_MODEL_NAME = "EntryViewModel";
     public IEntryWriter mockEntryWriter;
     public ITagReader mockTagReader;
-    public ITagWriter mockTagWriter;
 
     public EntryViewModel EntryVm;
 
@@ -45,15 +46,16 @@ public class EntryDetailViewModelTests
     [Fact]
     public void TagAddClicked_Test()
     {
+        var newTagModel = new TagModel();
         var sut = GetSut();
         sut.ApplyQueryAttributes(GetNavQuery());
 
-        Assert.Null(sut.Tags.FirstOrDefault(x => x.Name == "New Tag"));
+        sut.TagAdded += (sender, model) => newTagModel = model;
 
         sut.NewTag = "New Tag";
         sut.TagAddClickedCommand.Execute(null);
 
-        Assert.NotNull(sut.Tags.FirstOrDefault(x => x.Name == "New Tag"));
+        Assert.NotNull(sut.Tags.FirstOrDefault(x => x.Name == newTagModel.Name));
     }
 
     [Fact]
@@ -74,21 +76,24 @@ public class EntryDetailViewModelTests
     public void RemoveTagClicked_Test()
     {
         var sut = GetSut();
+
+        var deleteId = -1;
+
+        sut.TagRemoved += (sender, model) => deleteId = model.Id;
+
         sut.ApplyQueryAttributes(GetNavQuery());
         var tagToRemove = sut.Tags.First();
-
-        Assert.NotNull(sut.Tags.FirstOrDefault(x => x.Id == tagToRemove.Id));
         sut.RemoveTagClickedCommand.Execute(tagToRemove);
-        Assert.Null(sut.Tags.FirstOrDefault(x => x.Id == tagToRemove.Id));
+
+        Assert.Null(sut.Tags.FirstOrDefault(x => x.Id == deleteId));
     }
 
     public EntryDetailViewModel GetSut()
     {
-        mockEntryWriter = new MockEntryWriter();
         mockTagReader = new MockTagReader();
-        mockTagWriter = new MockTagWriter();
+        mockEntryWriter = new MockEntryWriter();
 
-        return new EntryDetailViewModel(mockEntryWriter, mockTagReader, mockTagWriter);
+        return new EntryDetailViewModel(mockEntryWriter, mockTagReader);
     }
 
     public IDictionary<string, object> GetNavQuery()
