@@ -1,6 +1,8 @@
-﻿using MagList.Data.Read;
+﻿using MagList.Data.Models;
+using MagList.Data.Read;
 using MagList.Data.Write;
 using MagList.EntryDetailPage;
+using MagList.MainPage;
 using SQLite;
 
 namespace MagList;
@@ -29,17 +31,39 @@ public static class MauiProgram
         builder.Services.AddTransient<ITagReader, SqliteTagReader>();
         builder.Services.AddTransient<ITagWriter, SqliteTagWriter>();
 		builder.Services.AddSingleton<MainPage.MainPage>();
-		builder.Services.AddSingleton<MainPage.MainPageViewModel>();
+		builder.Services.AddSingleton<MainPage.MainPageViewModel>(sp =>
+        {
+            var mainPageVm = new MainPageViewModel(
+                sp.GetService<IEntryReader>(),
+                sp.GetService<IListReader>(),
+                sp.GetService<IListWriter>());
+
+            var entryWriter = sp.GetService<IEntryWriter>();
+
+            mainPageVm.EntryAdded += (sender, model) =>
+                entryWriter.Write(EntryViewModel.ToEntryModel(model));
+            mainPageVm.EntryDeleted += (sender, model) =>
+                entryWriter.Delete(model.Id);
+            mainPageVm.SortOrderChanged += (sender, models) =>
+            {
+                //TODO: unit test an empty list
+                var modelList = models.Select(entry => EntryViewModel.ToEntryModel(entry)).ToList();
+                entryWriter.UpdateAll(modelList);
+            };
+
+            return mainPageVm;
+        });
 		builder.Services.AddSingleton<ListPage.ListPage>();
         builder.Services.AddTransient<EntryDetailViewModel>((sp) =>
         {
 			//TODO: move somewhere that makes more sense?
-			var entryDetailVm = new EntryDetailViewModel(sp.GetService<IEntryWriter>(), sp.GetService<ITagReader>());
+			var entryDetailVm = new EntryDetailViewModel(sp.GetService<ITagReader>());
 
             var tagWriter = sp.GetService<ITagWriter>();
 
             entryDetailVm.TagAdded += (sender, model) => tagWriter.Write(model);
-            entryDetailVm.TagRemoved += (ConversationSenders, model) => tagWriter.Delete(model.Id);
+            entryDetailVm.TagRemoved += (sender, model) => tagWriter.Delete(model.Id);
+            entryDetailVm.EntrySaved += (sender, model) => sp.GetService<IEntryWriter>().Update(EntryViewModel.ToEntryModel(model));
 
             return entryDetailVm;
         });

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MagList.Data.Models;
 using MagList.Data.Read;
-using MagList.Data.Write;
 using MagList.MainPage;
 
 namespace MagList.EntryDetailPage;
@@ -11,15 +10,14 @@ namespace MagList.EntryDetailPage;
 public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
 {
     public const string LIST_NAME_PARAM_NAME = "listName";
-    private readonly IEntryWriter _entryWriter;
     private readonly ITagReader _tagReader;
 
     public EventHandler<TagModel> TagAdded;
     public EventHandler<TagModel> TagRemoved;
+    public EventHandler<EntryViewModel> EntrySaved;
 
-    public EntryDetailViewModel(IEntryWriter entryWriter, ITagReader tagReader)
+    public EntryDetailViewModel(ITagReader tagReader)
     {
-        _entryWriter = entryWriter;
         _tagReader = tagReader;
     }
 
@@ -56,7 +54,7 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
     [RelayCommand]
     void SaveClicked()
     {
-        _entryWriter.Update(EntryViewModel.ToEntryModel(entryVm));
+        EntrySaved.Invoke(this, entryVm);
     }
 
     [RelayCommand]

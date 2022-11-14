@@ -11,17 +11,19 @@ namespace MagList.MainPage;
 public partial class MainPageViewModel : ObservableObject
 {
     private readonly IEntryReader _entryReader;
-    private readonly IEntryWriter _entryWriter;
     private readonly IListReader _listReader;
     private readonly IListWriter _listWriter;
 
     private List<ListModel> _lists;
     private ListModel _currentList;
 
-    public MainPageViewModel(IEntryReader entryReader, IEntryWriter entryWriter, IListReader listReader, IListWriter listWriter)
+    public EventHandler<EntryViewModel> EntryAdded;
+    public EventHandler<EntryViewModel> EntryDeleted;
+    public EventHandler<IEnumerable<EntryViewModel>> SortOrderChanged;
+
+    public MainPageViewModel(IEntryReader entryReader, IListReader listReader, IListWriter listWriter)
     {
         _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
-        _entryWriter = entryWriter ?? throw new ArgumentNullException(nameof(entryWriter));
         _listReader = listReader ?? throw new ArgumentException(nameof(listReader));
         _listWriter = listWriter ?? throw new ArgumentException(nameof(listWriter));
 
@@ -71,16 +73,16 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     void AddClicked()
     {
-        var newEntry = new EntryModel()
+        var newEntry = new EntryViewModel()
         {
             Name = NewEntryName,
             ListId = _currentList.Id,
             Description = $"Description for {NewEntryName}",
-            Order = EntryList.Count + 1
+            Order = EntryList.Count + 1,
         };
 
-        _entryWriter?.Write(newEntry);
-        EntryList.Add(EntryViewModel.FromEntryModel(newEntry));
+        EntryAdded.Invoke(this, newEntry);
+        EntryList.Add(newEntry);
 
         NewEntryName = "";
     }
@@ -88,7 +90,7 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     void DeleteClicked(EntryViewModel entry)
     {
-        _entryWriter?.Delete(entry.Id);
+        EntryDeleted.Invoke(this, entry);
         EntryList.Remove(entry);
     }
 
@@ -147,19 +149,7 @@ public partial class MainPageViewModel : ObservableObject
             EntryList[i].Order = i + 1;
         }
 
-        _entryWriter.UpdateAll(MapToEntryModelCollection(EntryList));
-    }
-
-    private IEnumerable<EntryModel> MapToEntryModelCollection(ObservableCollection<EntryViewModel> entryList)
-    {
-        var modelList = new List<EntryModel>();
-
-        foreach (var entry in entryList)
-        {
-            modelList.Add(EntryViewModel.ToEntryModel(entry));
-        }
-
-        return modelList;
+        SortOrderChanged.Invoke(this, EntryList);
     }
 }
 

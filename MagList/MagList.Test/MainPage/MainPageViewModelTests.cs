@@ -8,8 +8,6 @@ namespace MagList.Test.MainPage;
 public class MainPageViewModelTests
 {
     private readonly IEntryReader _mockEntryReader = new MockEntryReader();
-    private readonly IEntryWriter _mockEntryWriter = new MockEntryWriter();
-    private readonly IEntryWriter _badEntryWriter = new MockBadEntryWriter();
     private readonly IEntryReader _badEntryReader = new MockBadEntryReader();
 
     private readonly IListWriter _mockListWriter = new MockListWriter();
@@ -20,6 +18,7 @@ public class MainPageViewModelTests
     [Fact]
     public void AddCommand_Test()
     {
+        EntryViewModel addedEntry = new EntryViewModel{Id = -1};
         var sut = GetMainPageViewModel();
         var expectedAddition = new EntryViewModel()
         {
@@ -29,15 +28,15 @@ public class MainPageViewModelTests
             Order = -1
         };
 
+        sut.EntryAdded += (sender, model) => addedEntry = model;
         sut.NewEntryName = expectedAddition.Name;
-
         sut.AddClickedCommand.Execute(sut);
 
         Assert.Equal(
             expectedAddition.Description,
             sut.EntryList.First(x => x.Name == expectedAddition.Name).Description);
 
-        Assert.Equal(expectedAddition.Id, (_mockEntryWriter as MockEntryWriter).LastWriteId);
+        Assert.Equal(expectedAddition.Id, addedEntry.Id);
     }
 
     //TODO: change test to not add if all required fields are not filled out
@@ -45,43 +44,55 @@ public class MainPageViewModelTests
     [Fact]
     public void AddCommand_EmptyName_Test()
     {
+        var addedEntry = new EntryViewModel();
         var sut = GetMainPageViewModel();
 
+        sut.EntryAdded += (sender, model) => addedEntry = model;
         sut.AddClickedCommand.Execute(sut);
 
-        Assert.Equal(
-            "Description for ",
-            sut.EntryList.First(x => x.Name == "").Description);
+        Assert.Equal("Description for ", addedEntry.Description);
     }
 
     [Fact]
     public void DeleteCommand_Test()
     {
-        var entryToBeDeleted = EntryViewModel.FromEntryModel((_mockEntryReader as MockEntryReader)._entries[0]);
+        var expectedToBeDeleted = EntryViewModel.FromEntryModel((_mockEntryReader as MockEntryReader)._entries[0]);
         var sut = GetMainPageViewModel();
+        var entryDeletedParam = new EntryViewModel();
+        sut.EntryDeleted += (sender, model) => entryDeletedParam = model;
 
-        sut.DeleteClickedCommand.Execute(entryToBeDeleted);
-        Assert.False(sut.EntryList.Contains(entryToBeDeleted));
+        sut.DeleteClickedCommand.Execute(expectedToBeDeleted);
+
+        Assert.Equal(expectedToBeDeleted.Name, entryDeletedParam.Name);
+        Assert.False(sut.EntryList.Contains(expectedToBeDeleted));
     }
 
     [Fact]
     //TODO: double check, I'm not sure this is even right
     public void DragFirstItem_DownOneRow_Test()
     {
+        var sortOrderChangedParam = new List<EntryViewModel>();
         var sut = GetMainPageViewModel();
+        sut.SortOrderChanged += (sender, models)
+            => sortOrderChangedParam = models.ToList();
 
         sut.ItemDraggedCommand.Execute(sut.EntryList[0]);
         sut.ItemDraggedOverCommand.Execute(sut.EntryList[2]);
         sut.ItemDroppedCommand.Execute(sut.EntryList[2]);
 
         Assert.Equal(1, sut.EntryList[2].Id);
+        Assert.Equal(1, sortOrderChangedParam[2].Id);
     }
 
     [Fact]
     //TODO: double check, I'm not sure this is even right
     public void DragFirstItem_DownTwoRows_Test()
     {
+        var sortOrderChangedParam = new List<EntryViewModel>();
         var sut = GetMainPageViewModel();
+
+        sut.SortOrderChanged += (sender, models)
+            => sortOrderChangedParam = models.ToList();
 
         sut.ItemDraggedCommand.Execute(sut.EntryList[0]);
         sut.ItemDraggedOverCommand.Execute(sut.EntryList[2]);
@@ -90,6 +101,7 @@ public class MainPageViewModelTests
         sut.ItemDroppedCommand.Execute(sut.EntryList[3]);
 
         Assert.Equal(1, sut.EntryList[3].Id);
+        Assert.Equal(1, sortOrderChangedParam[3].Id);
     }
 
     [Fact]
@@ -108,25 +120,18 @@ public class MainPageViewModelTests
     public void Constructor_NoDataAccess_Test()
     {
         Assert.Throws<MainPageViewModelInitException>(
-            () => new MainPageViewModel(_badEntryReader, _badEntryWriter, _mockBadListReader, _mockBadListWriter));
-    }
-
-    [Fact]
-    public void Constructor_NullEntryWriter_Test()
-    {
-        Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(_badEntryReader, null, _mockBadListReader, _mockBadListWriter));
+            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, _mockBadListWriter));
     }
 
     [Fact]
     public void Constructor_NullEntryReader_Test()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(null, _badEntryWriter, _mockListReader, _mockListWriter));
+            () => new MainPageViewModel(null, _mockListReader, _mockListWriter));
     }
 
     private MainPageViewModel GetMainPageViewModel()
     {
-        return new MainPageViewModel(_mockEntryReader, _mockEntryWriter, _mockListReader, _mockListWriter);
+        return new MainPageViewModel(_mockEntryReader, _mockListReader, _mockListWriter);
     }
 }

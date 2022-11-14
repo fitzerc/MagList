@@ -1,10 +1,8 @@
 ﻿using MagList.Data.Models;
 using MagList.Data.Read;
-using MagList.Data.Write;
 using MagList.EntryDetailPage;
 using MagList.MainPage;
 using MagList.Test.Mocks;
-using Microsoft.Maui.Platform;
 
 namespace MagList.Test.EntryDetailPage;
 
@@ -12,7 +10,6 @@ public class EntryDetailViewModelTests
 {
     public const string LIST_NAME = "Test List";
     public const string ENTRY_VIEW_MODEL_NAME = "EntryViewModel";
-    public IEntryWriter mockEntryWriter;
     public ITagReader mockTagReader;
 
     public EntryViewModel EntryVm;
@@ -61,15 +58,19 @@ public class EntryDetailViewModelTests
     [Fact]
     public void SaveClicked_Test()
     {
+        var savedModel = new EntryViewModel();
         var sut = GetSut();
         sut.ApplyQueryAttributes(GetNavQuery());
+
+        sut.EntrySaved += (sender, model) => savedModel = model;
+
         sut.EntryVm.Description = "New Description";
 
         sut.SaveClickedCommand.Execute(null);
 
         Assert.Equal(
             "New Description", 
-            (mockEntryWriter as MockEntryWriter).LastUpdateModel.Description);
+            savedModel.Description);
     }
 
     [Fact]
@@ -91,9 +92,7 @@ public class EntryDetailViewModelTests
     public EntryDetailViewModel GetSut()
     {
         mockTagReader = new MockTagReader();
-        mockEntryWriter = new MockEntryWriter();
-
-        return new EntryDetailViewModel(mockEntryWriter, mockTagReader);
+        return new EntryDetailViewModel(mockTagReader);
     }
 
     public IDictionary<string, object> GetNavQuery()
