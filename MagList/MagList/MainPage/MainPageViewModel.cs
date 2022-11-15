@@ -12,7 +12,6 @@ public partial class MainPageViewModel : ObservableObject
 {
     private readonly IEntryReader _entryReader;
     private readonly IListReader _listReader;
-    private readonly IListWriter _listWriter;
 
     private List<ListModel> _lists;
     private ListModel _currentList;
@@ -20,20 +19,24 @@ public partial class MainPageViewModel : ObservableObject
     public EventHandler<EntryViewModel> EntryAdded;
     public EventHandler<EntryViewModel> EntryDeleted;
     public EventHandler<IEnumerable<EntryViewModel>> SortOrderChanged;
+    public EventHandler<ListModel> ListChanged;
 
-    public MainPageViewModel(IEntryReader entryReader, IListReader listReader, IListWriter listWriter)
+    public MainPageViewModel(IEntryReader entryReader, IListReader listReader, EventHandler<ListModel> writeListFunc)
     {
         _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
         _listReader = listReader ?? throw new ArgumentException(nameof(listReader));
-        _listWriter = listWriter ?? throw new ArgumentException(nameof(listWriter));
 
         try
         {
+            ListChanged += writeListFunc;
             _lists = _listReader.GetAll().ToList();
 
+            //TODO: move default list creation somewhere earlier?
             if (!_lists.Any())
             {
-                _listWriter.Write(new ListModel{Name = "Default"});
+                var defaultList = new ListModel {Name = "Default"};
+                ListChanged.Invoke(this, defaultList);
+
                 _lists = _listReader.GetAll().ToList();
             }
 

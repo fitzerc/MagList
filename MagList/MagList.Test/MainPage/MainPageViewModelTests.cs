@@ -1,7 +1,9 @@
-﻿using MagList.Data.Read;
+﻿using MagList.Data.Models;
+using MagList.Data.Read;
 using MagList.Data.Write;
 using MagList.MainPage;
 using MagList.Test.Mocks;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.DataCollection;
 
 namespace MagList.Test.MainPage;
 
@@ -10,10 +12,10 @@ public class MainPageViewModelTests
     private readonly IEntryReader _mockEntryReader = new MockEntryReader();
     private readonly IEntryReader _badEntryReader = new MockBadEntryReader();
 
-    private readonly IListWriter _mockListWriter = new MockListWriter();
-    private readonly IListWriter _mockBadListWriter = new MockBadListWriter();
     private readonly IListReader _mockListReader = new MockListReader();
     private readonly IListReader _mockBadListReader = new MockBadListReader();
+
+    private ListModel LastListChanged = new ListModel();
 
     [Fact]
     public void AddCommand_Test()
@@ -120,18 +122,22 @@ public class MainPageViewModelTests
     public void Constructor_NoDataAccess_Test()
     {
         Assert.Throws<MainPageViewModelInitException>(
-            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, _mockBadListWriter));
+            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, GetListChangedHandler()));
     }
 
     [Fact]
     public void Constructor_NullEntryReader_Test()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(null, _mockListReader, _mockListWriter));
+            () => new MainPageViewModel(null, _mockListReader, GetListChangedHandler()));
     }
 
-    private MainPageViewModel GetMainPageViewModel()
+    private MainPageViewModel GetMainPageViewModel(EventHandler<ListModel>? listChanged = null)
     {
-        return new MainPageViewModel(_mockEntryReader, _mockListReader, _mockListWriter);
+        listChanged ??= GetListChangedHandler();
+
+        return new MainPageViewModel(_mockEntryReader, _mockListReader, listChanged);
     }
+
+    private EventHandler<ListModel> GetListChangedHandler() => (sender, model) => LastListChanged = model;
 }

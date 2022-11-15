@@ -36,14 +36,16 @@ public static class MauiProgram
             var mainPageVm = new MainPageViewModel(
                 sp.GetService<IEntryReader>(),
                 sp.GetService<IListReader>(),
-                sp.GetService<IListWriter>());
+                (sender, model) => sp.GetService<IListWriter>().Write(model));
 
             var entryWriter = sp.GetService<IEntryWriter>();
 
             mainPageVm.EntryAdded += (sender, model) =>
                 entryWriter.Write(EntryViewModel.ToEntryModel(model));
+
             mainPageVm.EntryDeleted += (sender, model) =>
                 entryWriter.Delete(model.Id);
+
             mainPageVm.SortOrderChanged += (sender, models) =>
             {
                 //TODO: unit test an empty list
