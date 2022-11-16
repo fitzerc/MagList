@@ -36,7 +36,9 @@ public static class MauiProgram
             var mainPageVm = new MainPageViewModel(
                 sp.GetService<IEntryReader>(),
                 sp.GetService<IListReader>(),
-                (sender, model) => sp.GetService<IListWriter>().Write(model));
+                (sender, model) => sp.GetService<IListWriter>().Write(model),
+                async (viewName, navParams) => await Shell.Current.GoToAsync(viewName, navParams)
+                );
 
             var entryWriter = sp.GetService<IEntryWriter>();
 

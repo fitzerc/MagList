@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MagList.Data.Models;
 using MagList.Data.Read;
-using MagList.Data.Write;
 using System.Collections.ObjectModel;
 using MagList.EntryDetailPage;
 
@@ -21,10 +20,17 @@ public partial class MainPageViewModel : ObservableObject
     public EventHandler<IEnumerable<EntryViewModel>> SortOrderChanged;
     public EventHandler<ListModel> ListChanged;
 
-    public MainPageViewModel(IEntryReader entryReader, IListReader listReader, EventHandler<ListModel> writeListFunc)
+    private readonly Func<string, Dictionary<string, object>, Task> _onEntryTapped;
+
+    public MainPageViewModel(
+        IEntryReader entryReader,
+        IListReader listReader,
+        EventHandler<ListModel> writeListFunc,
+        Func<string, Dictionary<string, object>, Task> onEntryTapped)
     {
         _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
         _listReader = listReader ?? throw new ArgumentException(nameof(listReader));
+        _onEntryTapped = onEntryTapped;
 
         try
         {
@@ -70,7 +76,7 @@ public partial class MainPageViewModel : ObservableObject
             {nameof(EntryViewModel), entry}
         };
 
-        await Shell.Current.GoToAsync(nameof(EntryDetailView), navParams);
+        await _onEntryTapped.Invoke(nameof(EntryDetailView), navParams);
     }
 
     [RelayCommand]

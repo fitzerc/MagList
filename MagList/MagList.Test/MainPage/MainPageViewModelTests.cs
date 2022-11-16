@@ -16,6 +16,7 @@ public class MainPageViewModelTests
     private readonly IListReader _mockBadListReader = new MockBadListReader();
 
     private ListModel LastListChanged = new ListModel();
+    private EntryViewModel LastEntryTapped = new EntryViewModel();
 
     [Fact]
     public void AddCommand_Test()
@@ -122,22 +123,37 @@ public class MainPageViewModelTests
     public void Constructor_NoDataAccess_Test()
     {
         Assert.Throws<MainPageViewModelInitException>(
-            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, GetListChangedHandler()));
+            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, GetListChangedHandler(), GetEntryTappedFunc()));
+    }
+
+    [Fact]
+    public void EntryTapped_Test()
+    {
+        var sut = new MainPageViewModel(_mockEntryReader, _mockListReader, GetListChangedHandler(), GetEntryTappedFunc());
+        sut.EntryTappedCommand.Execute(sut.EntryList[0]);
+        Assert.Equal(sut.EntryList[0].Name, LastEntryTapped.Name);
     }
 
     [Fact]
     public void Constructor_NullEntryReader_Test()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(null, _mockListReader, GetListChangedHandler()));
+            () => new MainPageViewModel(null, _mockListReader, GetListChangedHandler(), GetEntryTappedFunc()));
     }
 
     private MainPageViewModel GetMainPageViewModel(EventHandler<ListModel>? listChanged = null)
     {
         listChanged ??= GetListChangedHandler();
 
-        return new MainPageViewModel(_mockEntryReader, _mockListReader, listChanged);
+        return new MainPageViewModel(_mockEntryReader, _mockListReader, listChanged, GetEntryTappedFunc());
     }
 
     private EventHandler<ListModel> GetListChangedHandler() => (sender, model) => LastListChanged = model;
+
+    private Func<string, Dictionary<string, object>, Task> GetEntryTappedFunc()
+    {
+        return (s, objects) =>
+            Task.Factory.StartNew(() =>
+                LastEntryTapped = objects.First(x => x.Key == nameof(EntryViewModel)).Value as EntryViewModel ?? throw new InvalidOperationException());
+    }
 }
