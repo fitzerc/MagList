@@ -46,8 +46,8 @@ namespace MagList
 
                 var entryWriter = sp.GetService<IEntryWriter>();
 
-                mainPageVm.EntryAdded += (sender, model) =>
-                    entryWriter.Write(EntryViewModel.ToEntryModel(model));
+                mainPageVm.EntryAdded += (sender, viewModel) =>
+                    entryWriter.Write(viewModel.ToEntryModel());
 
                 mainPageVm.EntryDeleted += (sender, model) =>
                     entryWriter.Delete(model.Id);
@@ -55,7 +55,7 @@ namespace MagList
                 mainPageVm.SortOrderChanged += (sender, models) =>
                 {
                     //TODO: unit test an empty list
-                    var modelList = models.Select(entry => EntryViewModel.ToEntryModel(entry)).ToList();
+                    var modelList = models.Select(entry => entry.ToEntryModel());
                     entryWriter.UpdateAll(modelList);
                 };
 
@@ -71,7 +71,8 @@ namespace MagList
 
                 entryDetailVm.TagAdded += (sender, model) => tagWriter.Write(model);
                 entryDetailVm.TagRemoved += (sender, model) => tagWriter.Delete(model.Id);
-                entryDetailVm.EntrySaved += (sender, model) => sp.GetService<IEntryWriter>().Update(EntryViewModel.ToEntryModel(model));
+                entryDetailVm.EntrySaved += (sender, model) =>
+                    sp.GetService<IEntryWriter>().Update(model.ToEntryModel());
 
                 return entryDetailVm;
             });
