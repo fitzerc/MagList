@@ -52,7 +52,7 @@ public partial class MainPageViewModel : ObservableObject
 
             foreach (var entry in entries)
             {
-                EntryList.Add(EntryViewModel.FromEntryModel(entry));
+                EntryList.Add(entry.ToEntryViewModel());
             }
         }
         catch (Exception e)

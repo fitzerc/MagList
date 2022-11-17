@@ -20,7 +20,7 @@ public class EntryViewModelTests
     {
         var model = GetEntryModel();
         var expectedVm = GetEntryViewModel();
-        var resultVm = EntryViewModel.FromEntryModel(model);
+        var resultVm = model.ToEntryViewModel();
 
         Assert.True(expectedVm.Equals(resultVm));
     }
@@ -35,12 +35,6 @@ public class EntryViewModelTests
         Assert.Equal(expectedToEqualVm.Name, sut.Name);
         Assert.Equal(expectedToEqualVm.Description, sut.Description);
         Assert.Equal(expectedToEqualVm.Order, sut.Order);
-    }
-
-    [Fact]
-    public void FromEntryModel_NullArgument_Test()
-    {
-        Assert.Throws(typeof(ArgumentNullException), () => EntryViewModel.FromEntryModel(null));
     }
 
     [Fact]

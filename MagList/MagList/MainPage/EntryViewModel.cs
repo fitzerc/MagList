@@ -38,23 +38,6 @@ public partial class EntryViewModel : ObservableObject
         };
     }
 
-    public static EntryViewModel FromEntryModel(EntryModel entryModel)
-    {
-        if (entryModel == null)
-        {
-            throw new ArgumentNullException(nameof(entryModel));
-        }
-
-        return new EntryViewModel
-        {
-            Id = entryModel.Id,
-            ListId = entryModel.ListId,
-            Name = entryModel.Name,
-            Description = entryModel.Description,
-            Order = entryModel.Order
-        };
-    }
-
     public bool Equals(EntryViewModel entryVm)
     {
         if (entryVm == null)
@@ -63,5 +46,20 @@ public partial class EntryViewModel : ObservableObject
         }
 
         return entryVm.Id == Id && entryVm.Name == Name && entryVm.Description == Description && entryVm.Order == Order;
+    }
+}
+
+public static class EntryModelExtensions
+{
+    public static EntryViewModel ToEntryViewModel(this EntryModel entryModel)
+    {
+        return new EntryViewModel
+        {
+            Id = entryModel.Id,
+            ListId = entryModel.ListId,
+            Name = entryModel.Name,
+            Description = entryModel.Description,
+            Order = entryModel.Order
+        };
     }
 }

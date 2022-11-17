@@ -59,7 +59,7 @@ public class MainPageViewModelTests
     [Fact]
     public void DeleteCommand_Test()
     {
-        var expectedToBeDeleted = EntryViewModel.FromEntryModel((_mockEntryReader as MockEntryReader)._entries[0]);
+        var expectedToBeDeleted = (_mockEntryReader as MockEntryReader)._entries[0].ToEntryViewModel();
         var sut = GetMainPageViewModel();
         var entryDeletedParam = new EntryViewModel();
         sut.EntryDeleted += (sender, model) => entryDeletedParam = model;
