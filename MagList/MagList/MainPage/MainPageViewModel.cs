@@ -37,15 +37,6 @@ public partial class MainPageViewModel : ObservableObject
             ListChanged += writeListFunc;
             _lists = _listReader.GetAll().ToList();
 
-            //TODO: move default list creation somewhere earlier?
-            if (!_lists.Any())
-            {
-                var defaultList = new ListModel {Name = "Default"};
-                ListChanged.Invoke(this, defaultList);
-
-                _lists = _listReader.GetAll().ToList();
-            }
-
             _currentList = _lists.FirstOrDefault();
 
             var entries = _entryReader.GetAllInList(_currentList.Id);

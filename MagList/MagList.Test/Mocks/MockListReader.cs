@@ -9,7 +9,9 @@ public class MockListReader : IListReader
 
     public IEnumerable<ListModel> GetAll()
     {
-        return new List<ListModel>() {CurrentList};
+        return CurrentList == null
+            ? new List<ListModel>()
+            : new List<ListModel>() {CurrentList};
     }
 
     public ListModel Get(int id)

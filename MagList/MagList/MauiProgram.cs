@@ -1,8 +1,6 @@
 ﻿using MagList.Data.Models;
 using MagList.Data.Read;
 using MagList.Data.Write;
-using MagList.EntryDetailPage;
-using MagList.MainPage;
 using SQLite;
 
 namespace MagList;
@@ -31,6 +29,21 @@ public static class MauiProgram
 		builder.Services.AddPages();
         builder.Services.AddViewModels();
 
+        var sp = builder.Services.BuildServiceProvider();
+		SetupInitialAppData(
+            sp.GetService<IListReader>(),
+            listModel => sp.GetService<IListWriter>().Write(listModel)
+            );
+
 		return builder.Build();
 	}
+
+	//Temporary
+    public static void SetupInitialAppData(IListReader listReader, Action<ListModel> writeList)
+    {
+        if (!listReader.GetAll().Any())
+        {
+			writeList.Invoke(new ListModel{Name = "Default"});
+        }
+    }
 }
