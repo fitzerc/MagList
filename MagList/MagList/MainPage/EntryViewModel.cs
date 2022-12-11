@@ -30,11 +30,11 @@ public partial class EntryViewModel : ObservableObject
     {
         return new EntryModel
         {
-            Id = this.Id,
-            ListId = this.ListId,
-            Name = this.Name,
-            Description = this.Description,
-            Order = this.Order
+            Id = Id,
+            ListId = ListId,
+            Name = Name,
+            Description = Description,
+            Order = Order
         };
     }
 

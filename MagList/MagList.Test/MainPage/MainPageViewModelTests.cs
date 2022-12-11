@@ -1,9 +1,8 @@
 ﻿using MagList.Data.Models;
 using MagList.Data.Read;
-using MagList.Data.Write;
 using MagList.MainPage;
+using MagList.Test.MainPage.EntriesListView;
 using MagList.Test.Mocks;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.DataCollection;
 
 namespace MagList.Test.MainPage;
 
@@ -14,9 +13,6 @@ public class MainPageViewModelTests
 
     private readonly IListReader _mockListReader = new MockListReader();
     private readonly IListReader _mockBadListReader = new MockBadListReader();
-
-    private ListModel LastListChanged = new ListModel();
-    private EntryViewModel LastEntryTapped = new EntryViewModel();
 
     [Fact]
     public void AddCommand_Test()
@@ -57,103 +53,19 @@ public class MainPageViewModelTests
     }
 
     [Fact]
-    public void DeleteCommand_Test()
+    public void Constructor_BadEntryReader_Test()
     {
-        var expectedToBeDeleted = (_mockEntryReader as MockEntryReader)._entries[0].ToEntryViewModel();
-        var sut = GetMainPageViewModel();
-        var entryDeletedParam = new EntryViewModel();
-        sut.EntryDeleted += (sender, model) => entryDeletedParam = model;
-
-        sut.DeleteClickedCommand.Execute(expectedToBeDeleted);
-
-        Assert.Equal(expectedToBeDeleted.Name, entryDeletedParam.Name);
-        Assert.False(sut.EntryList.Contains(expectedToBeDeleted));
+        Action constructorAction = () => new MainPageViewModel(null, _mockListReader, null);
+        Assert.Throws<ArgumentNullException>(constructorAction);
     }
 
     [Fact]
-    //TODO: double check, I'm not sure this is even right
-    public void DragFirstItem_DownOneRow_Test()
+    public void Constructor_BadListReader_Test()
     {
-        var sortOrderChangedParam = new List<EntryViewModel>();
-        var sut = GetMainPageViewModel();
-        sut.SortOrderChanged += (sender, models)
-            => sortOrderChangedParam = models.ToList();
-
-        sut.ItemDraggedCommand.Execute(sut.EntryList[0]);
-        sut.ItemDraggedOverCommand.Execute(sut.EntryList[2]);
-        sut.ItemDroppedCommand.Execute(sut.EntryList[2]);
-
-        Assert.Equal(1, sut.EntryList[2].Id);
-        Assert.Equal(1, sortOrderChangedParam[2].Id);
-    }
-
-    [Fact]
-    //TODO: double check, I'm not sure this is even right
-    public void DragFirstItem_DownTwoRows_Test()
-    {
-        var sortOrderChangedParam = new List<EntryViewModel>();
-        var sut = GetMainPageViewModel();
-
-        sut.SortOrderChanged += (sender, models)
-            => sortOrderChangedParam = models.ToList();
-
-        sut.ItemDraggedCommand.Execute(sut.EntryList[0]);
-        sut.ItemDraggedOverCommand.Execute(sut.EntryList[2]);
-        sut.ItemDragLeaveCommand.Execute(sut.EntryList[2]);
-        sut.ItemDraggedOverCommand.Execute(sut.EntryList[3]);
-        sut.ItemDroppedCommand.Execute(sut.EntryList[3]);
-
-        Assert.Equal(1, sut.EntryList[3].Id);
-        Assert.Equal(1, sortOrderChangedParam[3].Id);
-    }
-
-    [Fact]
-    public void DragFirstItem_DropOnSelf_Test()
-    {
-        var sut = GetMainPageViewModel();
-
-        sut.ItemDraggedCommand.Execute(sut.EntryList[0]);
-        sut.ItemDraggedOverCommand.Execute(sut.EntryList[0]);
-        sut.ItemDroppedCommand.Execute(sut.EntryList[0]);
-
-        Assert.Equal(1, sut.EntryList[0].Id);
-    }
-
-    [Fact]
-    public void Constructor_NoDataAccess_Test()
-    {
-        Assert.Throws<MainPageViewModelInitException>(
-            () => new MainPageViewModel(_badEntryReader, _mockBadListReader, GetListChangedHandler(), GetEntryTappedFunc()));
-    }
-
-    [Fact]
-    public void EntryTapped_Test()
-    {
-        var sut = new MainPageViewModel(_mockEntryReader, _mockListReader, GetListChangedHandler(), GetEntryTappedFunc());
-        sut.EntryTappedCommand.Execute(sut.EntryList[0]);
-        Assert.Equal(sut.EntryList[0].Name, LastEntryTapped.Name);
-    }
-
-    [Fact]
-    public void Constructor_NullEntryReader_Test()
-    {
-        Assert.Throws<ArgumentNullException>(
-            () => new MainPageViewModel(null, _mockListReader, GetListChangedHandler(), GetEntryTappedFunc()));
+        Action constructorAction = () => new MainPageViewModel(_mockEntryReader, null, null);
+        Assert.Throws<ArgumentNullException>(constructorAction);
     }
 
     private MainPageViewModel GetMainPageViewModel(EventHandler<ListModel>? listChanged = null)
-    {
-        listChanged ??= GetListChangedHandler();
-
-        return new MainPageViewModel(_mockEntryReader, _mockListReader, listChanged, GetEntryTappedFunc());
-    }
-
-    private EventHandler<ListModel> GetListChangedHandler() => (sender, model) => LastListChanged = model;
-
-    private Func<string, Dictionary<string, object>, Task> GetEntryTappedFunc()
-    {
-        return (s, objects) =>
-            Task.Factory.StartNew(() =>
-                LastEntryTapped = objects.First(x => x.Key == nameof(EntryViewModel)).Value as EntryViewModel ?? throw new InvalidOperationException());
-    }
+        => new MainPageViewModel(_mockEntryReader, _mockListReader, new EntriesListViewModelTests().GetEntriesListViewModel());
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MagList.MainPage.EntriesListView"
+             x:Class="MagList.MainPage.EntriesListView.EntriesListView">
+    <CollectionView ItemsSource="{Binding EntryList}" Margin="10, 0, 8, 0">
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Border StrokeShape="RoundRectangle 10,10,10,10"
+                            StrokeThickness="1"
+                            Stroke="{StaticResource Primary}"
+                            BackgroundColor="{StaticResource Secondary}">
+                    <Border.GestureRecognizers>
+                        <DragGestureRecognizer
+                                    DragStartingCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=ItemDraggedCommand}"
+                                    DragStartingCommandParameter="{Binding .}"
+                                    CanDrag="True" />
+                        <DropGestureRecognizer
+                                    DragOverCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=ItemDraggedOverCommand}"
+                                    DragOverCommandParameter="{Binding .}"
+                                    DragLeaveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=ItemDragLeaveCommand}"
+                                    DragLeaveCommandParameter="{Binding .}"
+                                    DropCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=ItemDroppedCommand}"
+                                    DropCommandParameter="{Binding .}" />
+                        <TapGestureRecognizer
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=EntryTappedCommand}"
+                            CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="87*" />
+                            <ColumnDefinition Width="13*" />
+                        </Grid.ColumnDefinitions>
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="{Binding Name}" TextColor="{StaticResource Tertiary}" FontSize="Medium" Margin="5, 0, 0, 0" />
+                            <Label Margin="15, 0, 0, 8" FontSize="Small" TextColor="{StaticResource Primary}" Text="{Binding Description}" />
+                        </VerticalStackLayout>
+                        <Button BackgroundColor="{StaticResource Secondary}"
+                                VerticalOptions="Center"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EntriesListViewModel}}, Path=DeleteClickedCommand}"
+                                CommandParameter="{Binding .}"
+                                Grid.Column="1"
+                                Text="x"
+                                TextColor="{StaticResource Primary}" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentView>

@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MagList.Data.Models;
 using MagList.Data.Read;
 using System.Collections.ObjectModel;
-using MagList.EntryDetailPage;
+using MagList.MainPage.EntriesListView;
 
 namespace MagList.MainPage;
 
@@ -16,35 +16,33 @@ public partial class MainPageViewModel : ObservableObject
     private ListModel _currentList;
 
     public EventHandler<EntryViewModel> EntryAdded;
-    public EventHandler<EntryViewModel> EntryDeleted;
-    public EventHandler<IEnumerable<EntryViewModel>> SortOrderChanged;
     public EventHandler<ListModel> ListChanged;
-
-    private readonly Func<string, Dictionary<string, object>, Task> _onEntryTapped;
 
     public MainPageViewModel(
         IEntryReader entryReader,
         IListReader listReader,
-        EventHandler<ListModel> writeListFunc,
-        Func<string, Dictionary<string, object>, Task> onEntryTapped)
+        EntriesListViewModel entriesListVm)
     {
         _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
-        _listReader = listReader ?? throw new ArgumentException(nameof(listReader));
-        _onEntryTapped = onEntryTapped;
+        _listReader = listReader ?? throw new ArgumentNullException(nameof(listReader));
+        entryListVm = entriesListVm;
 
         try
         {
-            ListChanged += writeListFunc;
             _lists = _listReader.GetAll().ToList();
 
             _currentList = _lists.FirstOrDefault();
 
             var entries = _entryReader.GetAllInList(_currentList.Id);
 
+            //TODO: move mapping out of VM
             foreach (var entry in entries)
             {
                 EntryList.Add(entry.ToEntryViewModel());
             }
+
+            entriesListVm.EntryList = EntryList;
+            entriesListVm.CurrentList = _currentList;
         }
         catch (Exception e)
         {
@@ -58,17 +56,8 @@ public partial class MainPageViewModel : ObservableObject
     [ObservableProperty]
     string newEntryName = "";
 
-    [RelayCommand]
-    async Task EntryTapped(EntryViewModel entry)
-    {
-        var navParams = new Dictionary<string, object>
-        {
-            {EntryDetailViewModel.LIST_NAME_PARAM_NAME, _currentList.Name},
-            {nameof(EntryViewModel), entry}
-        };
-
-        await _onEntryTapped.Invoke(nameof(EntryDetailView), navParams);
-    }
+    [ObservableProperty]
+    EntriesListViewModel entryListVm;
 
     [RelayCommand]
     void AddClicked()
@@ -85,71 +74,6 @@ public partial class MainPageViewModel : ObservableObject
         EntryList.Add(newEntry);
 
         NewEntryName = "";
-    }
-
-    [RelayCommand]
-    void DeleteClicked(EntryViewModel entry)
-    {
-        EntryDeleted.Invoke(this, entry);
-        EntryList.Remove(entry);
-    }
-
-    [RelayCommand]
-    void ItemDragged(EntryViewModel entry)
-    {
-        EntryList
-            .First(x => x.Name == entry.Name && x.Description == entry.Description)
-            .IsBeingDragged = true;
-    }
-
-    [RelayCommand]
-    void ItemDraggedOver(EntryViewModel entry)
-    {
-        EntryList
-            .First(x => x.Name == entry.Name && x.Description == entry.Description)
-            .IsBeingDraggedOver = true;
-    }
-
-    [RelayCommand]
-    void ItemDragLeave(EntryViewModel entry)
-    {
-        EntryList
-            .First(x => x.Name == entry.Name && x.Description == entry.Description)
-            .IsBeingDraggedOver = false;
-    }
-
-    [RelayCommand]
-    void ItemDropped(EntryViewModel item)
-    {
-        var itemToMove = EntryList.First(i => i.IsBeingDragged);
-        var itemToInsertBefore = item;
-        if (itemToMove == null || itemToInsertBefore == null || itemToMove == itemToInsertBefore)
-        {
-            return;
-        }
-
-        var insertAtIndex = EntryList.IndexOf(itemToInsertBefore);
-        EntryList.Remove(itemToMove);
-        EntryList.Insert(insertAtIndex, itemToMove);
-        itemToMove.IsBeingDragged = false;
-        itemToInsertBefore.IsBeingDraggedOver = false;
-
-        ReorderAndWriteList();
-    }
-
-    private void ReorderAndWriteList()
-    {
-        UpdateListEntryOrders();
-    }
-
-    private void UpdateListEntryOrders()
-    {
-        for (var i = 0; i < EntryList.Count; i++)
-        {
-            EntryList[i].Order = i + 1;
-        }
-
-        SortOrderChanged.Invoke(this, EntryList);
     }
 }
 
