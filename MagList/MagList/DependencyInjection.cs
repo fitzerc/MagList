@@ -3,12 +3,12 @@ using MagList.Data.Write;
 using MagList.EntryDetailPage;
 using MagList.MainPage;
 using MagList.MainPage.EntriesListView;
+using MagList.State;
 
 namespace MagList
 {
     public static class DependencyInjection
     {
-
         public static void AddDataReaders(this IServiceCollection services)
         {
             services.AddTransient<IEntryReader, SqliteEntryReader>();
@@ -21,6 +21,12 @@ namespace MagList
             services.AddTransient<IEntryWriter, SqliteEntryWriter>();
             services.AddTransient<IListWriter, SqliteListWriter>();
             services.AddTransient<ITagWriter, SqliteTagWriter>();
+        }
+
+        public static void AddAppState(this IServiceCollection services)
+        {
+            services.AddSingleton<AppState>();
+            services.AddSingleton<AppStateActions>();
         }
 
         public static void AddPages(this IServiceCollection services)
@@ -41,22 +47,19 @@ namespace MagList
                         var modelList = models.Select(entry => entry.ToEntryModel());
                         entryWriter.UpdateAll(modelList);
                     }, 
-                    (sender, model) => entryWriter.Delete(model.Id));
+                    (sender, model) => entryWriter.Delete(model.Id),
+                    sp.GetService<AppState>());
             });
 
 
             services.AddSingleton<MainPage.MainPageViewModel>(sp =>
             {
                 var mainPageVm = new MainPageViewModel(
-                    sp.GetService<IEntryReader>(),
-                    sp.GetService<IListReader>(),
-                    sp.GetService<EntriesListViewModel>()
-                );
-
-                var entryWriter = sp.GetService<IEntryWriter>();
+                    sp.GetService<EntriesListViewModel>(),
+                    sp.GetService<AppState>());
 
                 mainPageVm.EntryAdded += (sender, viewModel) =>
-                    entryWriter.Write(viewModel.ToEntryModel());
+                    sp.GetService<AppStateActions>().AddEntry(viewModel.ToEntryModel());
 
                 return mainPageVm;
             });

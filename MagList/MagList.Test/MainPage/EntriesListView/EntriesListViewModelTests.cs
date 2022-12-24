@@ -27,7 +27,7 @@ public class EntriesListViewModelTests
         sut.DeleteClickedCommand.Execute(expectedToBeDeleted);
 
         Assert.Equal(expectedToBeDeleted.Name, EntryDeletedParam.Name);
-        Assert.False(sut.EntryList.Contains(expectedToBeDeleted));
+        Assert.DoesNotContain(expectedToBeDeleted, sut.EntryList);
     }
 
     [Fact]

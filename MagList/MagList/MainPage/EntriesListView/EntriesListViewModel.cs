@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MagList.EntryDetailPage;
 using System.Collections.ObjectModel;
-using MagList.Data.Models;
+using MagList.State;
 
 namespace MagList.MainPage.EntriesListView;
 
@@ -12,28 +12,40 @@ public partial class EntriesListViewModel : ObservableObject
     public EventHandler<EntryViewModel> EntryDeleted;
 
     private Func<string, Dictionary<string, object>, Task> _onEntryTapped;
-    public ListModel CurrentList;
 
     [ObservableProperty]
-    ObservableCollection<EntryViewModel> entryList = new ();
+    ListState _currentList;
+
+    [ObservableProperty]
+    AppState _appState;
+
+    [ObservableProperty]
+    ObservableCollection<EntryViewModel> entryList;
 
     public EntriesListViewModel(
         Func<string, Dictionary<string, object>, Task> onEntryTapped,
         EventHandler<IEnumerable<EntryViewModel>> sortOrderChanged,
-        EventHandler<EntryViewModel> entryDeleted)
+        EventHandler<EntryViewModel> entryDeleted,
+        AppState appState)
     {
         _onEntryTapped = onEntryTapped;
         SortOrderChanged = sortOrderChanged;
         EntryDeleted = entryDeleted;
+
+        _appState = appState;
+        _currentList = _appState.CurrentList;
+        EntryList = _currentList.EntryVms;
     }
 
     [RelayCommand]
     async Task EntryTapped(EntryViewModel entry)
     {
+        _appState.CurrentEntry = new (){ Entry = entry.ToEntryModel() };
+
         var navParams = new Dictionary<string, object>
         {
-            {EntryDetailViewModel.LIST_NAME_PARAM_NAME, CurrentList.Name},
-            {nameof(EntryViewModel), entry}
+            {EntryDetailViewModel.LIST_NAME_PARAM_NAME, _currentList.List.Name},
+            {nameof(EntryViewModel), _appState.CurrentEntry}
         };
 
         await _onEntryTapped.Invoke(nameof(EntryDetailView), navParams);

@@ -1,48 +1,32 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MagList.Data.Models;
-using MagList.Data.Read;
 using System.Collections.ObjectModel;
 using MagList.MainPage.EntriesListView;
+using MagList.State;
 
 namespace MagList.MainPage;
 
 public partial class MainPageViewModel : ObservableObject
 {
-    private readonly IEntryReader _entryReader;
-    private readonly IListReader _listReader;
-
-    private List<ListModel> _lists;
-    private ListModel _currentList;
-
     public EventHandler<EntryViewModel> EntryAdded;
-    public EventHandler<ListModel> ListChanged;
 
-    public MainPageViewModel(
-        IEntryReader entryReader,
-        IListReader listReader,
-        EntriesListViewModel entriesListVm)
+    private readonly AppState _appState;
+
+    public MainPageViewModel(EntriesListViewModel entriesListVm, AppState appState)
     {
-        _entryReader = entryReader ?? throw new ArgumentNullException(nameof(entryReader));
-        _listReader = listReader ?? throw new ArgumentNullException(nameof(listReader));
+        _appState = appState;
+
+        //TODO: move to use state
         entryListVm = entriesListVm;
 
         try
         {
-            _lists = _listReader.GetAll().ToList();
+            var entries = _appState.CurrentList.Entries;
 
-            _currentList = _lists.FirstOrDefault();
+            EntryList = _appState.CurrentList.EntryVms;
 
-            var entries = _entryReader.GetAllInList(_currentList.Id);
-
-            //TODO: move mapping out of VM
-            foreach (var entry in entries)
-            {
-                EntryList.Add(entry.ToEntryViewModel());
-            }
-
-            entriesListVm.EntryList = EntryList;
-            entriesListVm.CurrentList = _currentList;
+            entriesListVm.EntryList = _appState.CurrentList.EntryVms;
+            entriesListVm.CurrentList = _appState.CurrentList;
         }
         catch (Exception e)
         {
@@ -51,10 +35,10 @@ public partial class MainPageViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    ObservableCollection<EntryViewModel> entryList = new ObservableCollection<EntryViewModel>();
+    ObservableCollection<EntryViewModel> entryList;
 
     [ObservableProperty]
-    string newEntryName = "";
+    string newEntryName;
 
     [ObservableProperty]
     EntriesListViewModel entryListVm;
@@ -65,12 +49,13 @@ public partial class MainPageViewModel : ObservableObject
         var newEntry = new EntryViewModel()
         {
             Name = NewEntryName,
-            ListId = _currentList.Id,
+            ListId = _appState.CurrentList.List.Id,
             Description = $"Description for {NewEntryName}",
             Order = EntryList.Count + 1,
         };
 
         EntryAdded.Invoke(this, newEntry);
+        //TODO: shouldn't need to add manually once command updates observable
         EntryList.Add(newEntry);
 
         NewEntryName = "";
