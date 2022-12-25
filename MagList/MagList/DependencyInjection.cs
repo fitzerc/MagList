@@ -23,12 +23,6 @@ namespace MagList
             services.AddTransient<ITagWriter, SqliteTagWriter>();
         }
 
-        public static void AddAppState(this IServiceCollection services)
-        {
-            services.AddSingleton<AppState>();
-            services.AddSingleton<AppStateActions>();
-        }
-
         public static void AddPages(this IServiceCollection services)
         {
             services.AddSingleton<MainPage.MainPage>();
@@ -39,15 +33,25 @@ namespace MagList
         {
             services.AddSingleton<EntriesListViewModel>(sp =>
             {
-                var entryWriter = sp.GetService<IEntryWriter>();
+                var appStateActions = sp.GetService<AppStateActions>();
+
                 return new EntriesListViewModel(
-                    async (viewName, navParams) => await Shell.Current.GoToAsync(viewName, navParams),
+                    async (viewName, navParams) =>
+                    {
+                        if (navParams[nameof(EntryViewModel)] is not EntryViewModel entryVmParam)
+                        {
+                            throw new NullReferenceException("EntryViewModel must be passed");
+                        }
+
+                        appStateActions.SetCurrentEntryDetailState(entryVmParam.ToEntryModel());
+                        await Shell.Current.GoToAsync(viewName, navParams);
+                    },
                     (sender, models) =>
                     {
                         var modelList = models.Select(entry => entry.ToEntryModel());
-                        entryWriter.UpdateAll(modelList);
-                    }, 
-                    (sender, model) => entryWriter.Delete(model.Id),
+                        appStateActions.UpdateAllEntries(modelList);
+                    },
+                    (sender, viewModel) => appStateActions.DeleteEntry(viewModel.ToEntryModel()),
                     sp.GetService<AppState>());
             });
 
@@ -66,15 +70,13 @@ namespace MagList
 
             services.AddTransient<EntryDetailViewModel>((sp) =>
             {
-                //TODO: move somewhere that makes more sense?
-                var entryDetailVm = new EntryDetailViewModel(sp.GetService<ITagReader>());
+                var entryDetailVm = new EntryDetailViewModel(sp.GetService<AppState>());
 
-                var tagWriter = sp.GetService<ITagWriter>();
+                var appStateActions = sp.GetService<AppStateActions>();
 
-                entryDetailVm.TagAdded += (sender, model) => tagWriter.Write(model);
-                entryDetailVm.TagRemoved += (sender, model) => tagWriter.Delete(model.Id);
-                entryDetailVm.EntrySaved += (sender, model) =>
-                    sp.GetService<IEntryWriter>().Update(model.ToEntryModel());
+                entryDetailVm.TagAdded += (sender, model) => appStateActions.AddTag(model);
+                entryDetailVm.TagRemoved += (sender, model) => appStateActions.DeleteTag(model);
+                entryDetailVm.EntrySaved += (sender, viewModel) => appStateActions.UpdateEntry(viewModel.ToEntryModel());
 
                 return entryDetailVm;
             });

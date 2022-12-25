@@ -1,6 +1,7 @@
 ﻿using MagList.Data.Models;
 using MagList.Data.Read;
 using MagList.Data.Write;
+using MagList.MainPage;
 using System.Collections.ObjectModel;
 
 namespace MagList.State;
@@ -36,6 +37,60 @@ public class AppStateActions
     public void AddEntry(EntryModel entry)
     {
         _entryWriter.Write(entry);
+        RefreshCurrentEntries();
+    }
+
+    public void UpdateEntry(EntryModel entry)
+    {
+        _entryWriter.Update(entry);
+        RefreshCurrentEntries();
+    }
+
+    public void UpdateAllEntries(IEnumerable<EntryModel> entriesList)
+    {
+        _entryWriter.UpdateAll(entriesList);
+        RefreshCurrentEntries();
+    }
+
+    public void DeleteEntry(EntryModel entry)
+    {
+        _entryWriter.Delete(entry.Id);
+        RefreshCurrentEntries();
+    }
+
+    public void AddTag(TagModel tag)
+    {
+        _tagWriter.Write(tag);
+        RefreshTags();
+    }
+
+    public void DeleteTag(TagModel tag)
+    {
+        _tagWriter.Delete(tag.Id);
+        RefreshTags();
+    }
+
+    public void SetCurrentEntryDetailState(EntryModel entryVm)
+    {
+        _appState.CurrentEntry = new EntryState() { Entry = entryVm };
+        _appState.CurrentEntryDetailState = new CurrentEntryDetailState
+        {
+            EntryViewModel = entryVm.ToEntryViewModel(),
+        };
+
+        RefreshTags();
+    }
+
+    private void RefreshTags()
+    {
+        _appState.CurrentEntryDetailState.Tags =
+            new ObservableCollection<TagModel>(
+                _tagReader.GetTagsForEntry(_appState.CurrentEntryDetailState.EntryViewModel.Id));
+    }
+
+
+    private void RefreshCurrentEntries()
+    {
         _appState.CurrentList.Entries =
             new ObservableCollection<EntryModel>(_entryReader.GetAllInList(_appState.CurrentList.List.Id));
     }

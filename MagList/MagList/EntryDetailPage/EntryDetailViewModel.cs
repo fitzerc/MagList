@@ -4,25 +4,27 @@ using CommunityToolkit.Mvvm.Input;
 using MagList.Data.Models;
 using MagList.Data.Read;
 using MagList.MainPage;
+using MagList.State;
 
 namespace MagList.EntryDetailPage;
 
 public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
 {
     public const string LIST_NAME_PARAM_NAME = "listName";
-    private readonly ITagReader _tagReader;
+    private readonly AppState _appState;
 
     public EventHandler<TagModel> TagAdded;
     public EventHandler<TagModel> TagRemoved;
     public EventHandler<EntryViewModel> EntrySaved;
 
-    public EntryDetailViewModel(ITagReader tagReader)
+    public EntryDetailViewModel(AppState appState)
     {
-        _tagReader = tagReader;
+        _appState = appState;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        //TODO: should use appState instead of nav param?
         if (query[nameof(EntryViewModel)] is not EntryViewModel entryVmParam)
         {
             throw new NullReferenceException("EntryViewModel must be passed");
@@ -33,10 +35,7 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
         listName = query[LIST_NAME_PARAM_NAME] as string;
         OnPropertyChanged(nameof(EntryVm));
 
-        foreach (var tag in _tagReader.GetTagsForEntry(entryVm.Id))
-        {
-            tags.Add(tag);
-        }
+        tags = _appState.CurrentEntryDetailState.Tags;
     }
 
     [ObservableProperty]
@@ -46,7 +45,7 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
     EntryViewModel entryVm;
 
     [ObservableProperty]
-    ObservableCollection<TagModel> tags = new ObservableCollection<TagModel>();
+    ObservableCollection<TagModel> tags;
 
     [ObservableProperty]
     string listName = "List Name Here";

@@ -15,6 +15,9 @@ public partial class AppState : ObservableObject
 
     [ObservableProperty]
     EntryState _currentEntry;
+
+    [ObservableProperty]
+    CurrentEntryDetailState _currentEntryDetailState;
 }
 
 public partial class ListState : ObservableObject
@@ -39,5 +42,14 @@ public partial class EntryState : ObservableObject
     [ObservableProperty]
     string _newEntryName = "";
 
-    EntryViewModel EntryVm => _entry.ToEntryViewModel();
+    public EntryViewModel EntryVm => _entry.ToEntryViewModel();
+}
+
+public partial class CurrentEntryDetailState : ObservableObject
+{
+    [ObservableProperty]
+    EntryViewModel _entryViewModel;
+
+    [ObservableProperty]
+    ObservableCollection<TagModel> _tags;
 }

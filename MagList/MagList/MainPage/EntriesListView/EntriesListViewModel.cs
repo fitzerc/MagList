@@ -40,12 +40,10 @@ public partial class EntriesListViewModel : ObservableObject
     [RelayCommand]
     async Task EntryTapped(EntryViewModel entry)
     {
-        _appState.CurrentEntry = new (){ Entry = entry.ToEntryModel() };
-
         var navParams = new Dictionary<string, object>
         {
             {EntryDetailViewModel.LIST_NAME_PARAM_NAME, _currentList.List.Name},
-            {nameof(EntryViewModel), _appState.CurrentEntry}
+            {nameof(EntryViewModel), entry}
         };
 
         await _onEntryTapped.Invoke(nameof(EntryDetailView), navParams);
