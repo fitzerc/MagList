@@ -55,8 +55,9 @@ public partial class MainPageViewModel : ObservableObject
         };
 
         EntryAdded.Invoke(this, newEntry);
-        //TODO: shouldn't need to add manually once command updates observable
-        EntryList.Add(newEntry);
+
+        //TODO: how to update this based on observables rather than manually?
+        EntryListVm.EntryList = _appState.CurrentList.EntryVms;
 
         NewEntryName = "";
     }

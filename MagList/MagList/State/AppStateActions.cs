@@ -83,15 +83,20 @@ public class AppStateActions
 
     private void RefreshTags()
     {
-        _appState.CurrentEntryDetailState.Tags =
-            new ObservableCollection<TagModel>(
-                _tagReader.GetTagsForEntry(_appState.CurrentEntryDetailState.EntryViewModel.Id));
+        var dbTags = _tagReader.GetTagsForEntry(_appState.CurrentEntryDetailState.EntryViewModel.Id);
+        _appState.CurrentEntryDetailState.Tags.Clear();
+
+        foreach (var tag in dbTags)
+        {
+            _appState.CurrentEntryDetailState.Tags.Add(tag);
+        }
     }
 
 
     private void RefreshCurrentEntries()
     {
-        _appState.CurrentList.Entries =
-            new ObservableCollection<EntryModel>(_entryReader.GetAllInList(_appState.CurrentList.List.Id));
+        _appState.CurrentList.SetEntries(
+            new ObservableCollection<EntryModel>
+            (_entryReader.GetAllInList(_appState.CurrentList.List.Id)));
     }
 }

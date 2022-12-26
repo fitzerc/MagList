@@ -35,7 +35,7 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
         listName = query[LIST_NAME_PARAM_NAME] as string;
         OnPropertyChanged(nameof(EntryVm));
 
-        tags = _appState.CurrentEntryDetailState.Tags;
+        Tags = _appState.CurrentEntryDetailState.Tags;
     }
 
     [ObservableProperty]
@@ -65,7 +65,6 @@ public partial class EntryDetailViewModel : ObservableObject, IQueryAttributable
             EntryId = entryVm.Id
         };
 
-        tags.Add(newTagModel);
         TagAdded.Invoke(this, newTagModel);
 
         NewTag = "";

@@ -61,8 +61,9 @@ public static class MauiProgram
 
         appState.CurrentList = new ListState
         {
-            List = listReader.Get(firstListId),
-            Entries = new ObservableCollection<EntryModel>(entryReader.GetAllInList(firstListId))
+            List = listReader.Get(firstListId)
         };
+
+        appState.CurrentList.SetEntries(new ObservableCollection<EntryModel>(entryReader.GetAllInList(firstListId)));
     }
 }

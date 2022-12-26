@@ -28,10 +28,15 @@ public partial class ListState : ObservableObject
     [ObservableProperty]
     ObservableCollection<EntryModel> _entries;
 
-    public ObservableCollection<EntryViewModel> EntryVms =>
-        new ObservableCollection<EntryViewModel>(
-            _entries.Select(x => x.ToEntryViewModel()).ToList()
-            );
+    public void SetEntries(ObservableCollection<EntryModel> entries)
+    {
+        var vmCollection = entries.Select(entryModel => entryModel.ToEntryViewModel()).ToList();
+
+        _entryVms = new ObservableCollection<EntryViewModel>(vmCollection);
+    }
+
+    [ObservableProperty]
+    ObservableCollection<EntryViewModel> _entryVms;
 }
 
 public partial class EntryState : ObservableObject
@@ -51,5 +56,5 @@ public partial class CurrentEntryDetailState : ObservableObject
     EntryViewModel _entryViewModel;
 
     [ObservableProperty]
-    ObservableCollection<TagModel> _tags;
+    ObservableCollection<TagModel> _tags = new ObservableCollection<TagModel>();
 }
